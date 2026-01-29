@@ -87,7 +87,7 @@ export default function DiagnosticFlow() {
         {/* Question Card */}
         <Card className="p-6 md:p-8 mb-8 shadow-lg border-0 bg-white">
           <div className="mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-balance">
+            <h2 className="text-xl md:text-3xl font-bold text-foreground">
               {question.question}
             </h2>
           </div>
