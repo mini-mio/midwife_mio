@@ -1,10 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
-import { DIAGNOSTIC_QUESTIONS, TYPE_DETAILS, type DiagnosticResult as DiagnosticResultType } from '@/lib/diagnostic-data';
+import { type DiagnosticResult as DiagnosticResultType } from '@/lib/diagnostic-data';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Download, RotateCcw } from 'lucide-react';
 
 interface DiagnosticResultProps {
@@ -26,6 +24,8 @@ export default function DiagnosticResultComponent({
     setDownloading(true);
 
     try {
+      const { default: html2canvas } = await import('html2canvas');
+
       const canvas = await html2canvas(resultRef.current, {
         backgroundColor: '#fefdfb',
         scale: 2,
@@ -34,12 +34,26 @@ export default function DiagnosticResultComponent({
         allowTaint: true,
       });
 
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+
+      if (!blob) {
+        alert('画像の生成に失敗しました。');
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = canvas.toDataURL('image/png');
+      link.href = url;
       link.download = `出産観診断結果_${new Date().toISOString().split('T')[0]}.png`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (error) {
       console.error('画像保存エラー:', error);
+      alert('画像の保存に失敗しました。スクリーンショットをお試しください。');
     } finally {
       setDownloading(false);
     }
